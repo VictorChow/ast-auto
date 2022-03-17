@@ -1,7 +1,5 @@
 package me;
 
-import com.kangyonggan.methodlogger.MethodLogger;
-
 import java.util.Collections;
 import java.util.Objects;
 
@@ -18,16 +16,15 @@ public class Main {
 
     //    @LogParam
     public static void main(String[] args) {
-        System.err.println(args.getClass().isArray());
+        //        System.err.println(args.getClass().isArray());
         test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
         test2(123);
         test3("1", "2", "3");
     }
 
-    @LogParam
+    //    @LogParam
     public static String test(Object param1, Object param2) {
         if (param1 == null) {
-            System.err.println("~~~");
             return String.valueOf(param2);
         }
         if (param2 == null) {
@@ -36,7 +33,12 @@ public class Main {
         return param1 + " + " + param2;
     }
 
-    @MethodLogger
+    //    @LogParam
+    private static void test2(int age) {
+        System.err.println(age);
+    }
+
+    //    @MethodLogger
     public static String test2(Object param1, Object param2) {
         if (param1 == null) {
             return String.valueOf(param2);
@@ -47,10 +49,6 @@ public class Main {
         return param1 + " + " + param2;
     }
 
-    @LogParam
-    private static String test2(int age) {
-        return age + " ===";
-    }
 
     @LogParam
     private static String test3(String... strings) {

@@ -1,5 +1,7 @@
 package me;
 
+import com.kangyonggan.methodlogger.MethodLogger;
+
 import java.util.Collections;
 import java.util.Objects;
 
@@ -11,7 +13,6 @@ import me.victor.lombok.core.annotation.LogParam;
 
 //@LogParam
 public class Main {
-
 
     private String name;
 
@@ -25,6 +26,24 @@ public class Main {
 
     @LogParam
     public static String test(Object param1, Object param2) {
+        if (param1 == null) {
+            System.err.println("~~~");
+            return String.valueOf(param2);
+        }
+        if (param2 == null) {
+            return String.valueOf(param1);
+        }
+        return param1 + " + " + param2;
+    }
+
+    @MethodLogger
+    public static String test2(Object param1, Object param2) {
+        if (param1 == null) {
+            return String.valueOf(param2);
+        }
+        if (param2 == null) {
+            return String.valueOf(param1);
+        }
         return param1 + " + " + param2;
     }
 

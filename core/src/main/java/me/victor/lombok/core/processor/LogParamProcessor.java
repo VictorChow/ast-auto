@@ -1,5 +1,6 @@
 package me.victor.lombok.core.processor;
 
+import com.cebbank.poin.core.log.CSPSLogFactory;
 import com.cebbank.poin.core.log.CSPSLogger;
 import com.google.auto.service.AutoService;
 import com.sun.source.tree.Tree;
@@ -79,17 +80,16 @@ public class LogParamProcessor extends AbstractProcessor {
                 .filter(it -> it.getKind() == Tree.Kind.METHOD)
                 .map(it -> (JCTree.JCMethodDecl) it)
                 .filter(it -> !it.name.toString().contains(CONSTRUCTOR))
-                .forEach(it -> insertLogParam(it, loggerName));
+                .forEach(it -> insertLogParam(classDecl, it, loggerName));
     }
 
     private void handleMethods(JCTree.JCMethodDecl methodDecl) {
         JCTree.JCClassDecl classDecl = (JCTree.JCClassDecl) trees.getTree(methodDecl.sym.owner);
         if (symbols.contains(classDecl)) {
             //标记在类上的注解已经处理所以方法, 无需在标记方法上再次处理
-            log("ignored " + methodDecl.name);
             return;
         }
-        insertLogParam(methodDecl, getLoggerName(classDecl));
+        insertLogParam(classDecl, methodDecl, getLoggerName(classDecl));
     }
 
 
@@ -105,7 +105,7 @@ public class LogParamProcessor extends AbstractProcessor {
 
     private String createPoinLogField(JCTree.JCClassDecl classDecl) {
         String defaultLoggerName = "logger";
-        String statement = "com.cebbank.poin.core.log.CSPSLogFactory.get";
+        String statement = CSPSLogFactory.class.getCanonicalName() + ".get";
         JCTree.JCMethodInvocation loggerInit = treeMaker.Apply(
                 List.nil(),
                 chainDots(statement),
@@ -121,9 +121,13 @@ public class LogParamProcessor extends AbstractProcessor {
         return defaultLoggerName;
     }
 
-    private void insertLogParam(JCTree.JCMethodDecl methodDecl, String loggerName) {
+    private void insertLogParam(JCTree.JCClassDecl classDecl, JCTree.JCMethodDecl methodDecl, String loggerName) {
         java.util.List<JCTree.JCExpression> params = methodDecl.params.stream()
-                .map(it -> treeMaker.Binary(JCTree.Tag.PLUS, treeMaker.Literal(it.name + "="), handleParamToString(it)))
+                .map(it -> treeMaker.Binary(
+                        JCTree.Tag.PLUS,
+                        treeMaker.Literal(it.name + "="),
+                        handleParamToString(it))
+                )
                 .collect(Collectors.toList());
         java.util.List<JCTree.JCExpression> joinParams = new ArrayList<>();
         joinParams.add(treeMaker.Literal(", "));
@@ -133,7 +137,11 @@ public class LogParamProcessor extends AbstractProcessor {
                 chainDots(String.class.getCanonicalName() + ".join"),
                 List.from(joinParams)
         );
-        JCTree.JCExpression infoParam = treeMaker.Binary(JCTree.Tag.PLUS, treeMaker.Literal(methodDecl.name + "入参: "), stringJoin);
+        JCTree.JCExpression infoParam = treeMaker.Binary(
+                JCTree.Tag.PLUS,
+                treeMaker.Literal("<" + classDecl.name + "." + methodDecl.name + "> args: "),
+                stringJoin
+        );
         JCTree.JCExpressionStatement statement = treeMaker.Exec(treeMaker.Apply(
                 List.nil(),
                 chainDots(loggerName + ".info"),
@@ -163,7 +171,6 @@ public class LogParamProcessor extends AbstractProcessor {
     }
 
     private void log(Object... objects) {
-        java.util.List<String> msg = Arrays.stream(objects).map(Object::toString).collect(Collectors.toList());
-        messager.printMessage(Diagnostic.Kind.NOTE, "😏 " + String.join(", ", msg));
+        messager.printMessage(Diagnostic.Kind.NOTE, "😏 " + Arrays.stream(objects).map(Object::toString).collect(Collectors.joining(", ")));
     }
 }

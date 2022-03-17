@@ -24,11 +24,10 @@
             <version>1.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
-            <groupId>com.github.houbb</groupId>
-            <artifactId>auto-log-annotation</artifactId>
-            <version>0.0.15</version>
+            <groupId>com.kangyonggan</groupId>
+            <artifactId>method-logger</artifactId>
+            <version>1.6</version>
         </dependency>
     </dependencies>
 </project>

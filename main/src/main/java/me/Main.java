@@ -1,8 +1,5 @@
 package me;
 
-import java.util.Collections;
-import java.util.Objects;
-
 import me.victor.lombok.core.annotation.LogParam;
 
 /**
@@ -17,9 +14,10 @@ public class Main {
     //    @LogParam
     public static void main(String[] args) {
         //        System.err.println(args.getClass().isArray());
-        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
-        test2(123);
-        test3("1", "2", "3");
+        //        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
+        //        test2(123);
+        //        test3("1", "2", "3");
+        testReturn("Victor");
     }
 
     //    @LogParam
@@ -50,19 +48,39 @@ public class Main {
     }
 
 
-    @LogParam
+    //    @LogParam
     private static String test3(String... strings) {
         return " ===";
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+    @LogParam
+    private static String testReturn(String name) {
+        //        if (System.currentTimeMillis() > 0) {
+        //            return "1";
+        //        } else return "2";
 
-        Main main = (Main) o;
+        //        synchronized (Main.class) {
+        //            return "111";
+        //        }
 
-        return Objects.equals(name, main.name);
+        for (char c : name.toCharArray()) {
+            if (c == 'c') return "666666";
+        }
+
+        //        switch (name.length()) {
+        //            case 1:
+        //                return "ooooooo";
+        //            case 2:
+        //                String time = String.valueOf(System.currentTimeMillis());
+        //                time += " 123";
+        //                return time;
+        //            default:
+        //                return "default !!";
+        //        }
+
+
+        return "12345";
     }
+
 
 }

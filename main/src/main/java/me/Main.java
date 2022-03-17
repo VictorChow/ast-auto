@@ -1,5 +1,7 @@
 package me;
 
+import java.util.ArrayList;
+
 import me.victor.lombok.core.annotation.LogParam;
 
 /**
@@ -17,7 +19,7 @@ public class Main {
         //        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
         //        test2(123);
         //        test3("1", "2", "3");
-        testReturn("Victor");
+        System.err.println(testReturn("12"));
     }
 
     //    @LogParam
@@ -63,23 +65,30 @@ public class Main {
         //            return "111";
         //        }
 
-        for (char c : name.toCharArray()) {
-            if (c == 'c') return "666666";
-        }
+        //        for (char c : name.toCharArray()) {
+        //            if (c == 'c') return "ccccc";
+        //            else return "no ccccc";
+        //        }
 
+        if (name.length() > 3) return ">3";
+
+        new ArrayList<>().get(0);
         //        switch (name.length()) {
-        //            case 1:
-        //                return "ooooooo";
+        //            case 1: {
+        //                System.err.println("~~~");
+        //                return "111";
+        //            }
         //            case 2:
         //                String time = String.valueOf(System.currentTimeMillis());
         //                time += " 123";
         //                return time;
+        //            case 3:
         //            default:
         //                return "default !!";
         //        }
 
 
-        return "12345";
+        return "def";
     }
 
 

@@ -139,7 +139,6 @@ public class LogParamProcessor extends AbstractProcessor {
             @Override
             public void visitBlock(JCTree.JCBlock jcBlock) {
                 super.visitBlock(jcBlock);
-                log("visitBlock " + jcBlock);
                 List<JCTree.JCStatement> blockStats = jcBlock.stats;
                 if (blockStats == null || blockStats.isEmpty()) {
                     return;
@@ -162,9 +161,23 @@ public class LogParamProcessor extends AbstractProcessor {
             }
 
             @Override
-            public void visitReturn(JCTree.JCReturn jcReturn) {
-                super.visitReturn(jcReturn);
-                //                log("jcReturn " + jcReturn);
+            public void visitIf(JCTree.JCIf jcIf) {
+                if (jcIf.thenpart != null && !(jcIf.thenpart instanceof JCTree.JCBlock)) {
+                    jcIf.thenpart = treeMaker.Block(0, List.of(jcIf.thenpart));
+                }
+                if (jcIf.elsepart != null && !(jcIf.elsepart instanceof JCTree.JCBlock)) {
+                    jcIf.elsepart = treeMaker.Block(0, List.of(jcIf.elsepart));
+                }
+                super.visitIf(jcIf);
+            }
+
+            @Override
+            public void visitCase(JCTree.JCCase jcCase) {
+                List<JCTree.JCStatement> stats = jcCase.stats;
+                if (stats != null && !stats.isEmpty() && !(stats.get(0) instanceof JCTree.JCBlock)) {
+                    jcCase.stats = List.of(treeMaker.Block(0, stats));
+                }
+                super.visitCase(jcCase);
             }
         });
     }

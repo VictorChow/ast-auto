@@ -1,7 +1,5 @@
 package me;
 
-import java.util.ArrayList;
-
 import me.victor.lombok.core.annotation.LogParam;
 
 /**
@@ -10,8 +8,11 @@ import me.victor.lombok.core.annotation.LogParam;
 
 //@LogParam
 public class Main {
+    //    private static final CSPSLogger log = CSPSLogFactory.get(Main.class);
 
-    private String name;
+
+    private java.lang.String name;
+    private String name2;
 
     //    @LogParam
     public static void main(String[] args) {
@@ -19,7 +20,39 @@ public class Main {
         //        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
         //        test2(123);
         //        test3("1", "2", "3");
-        System.err.println(testReturn("12"));
+        System.err.println("结果:" + testReturn("12"));
+    }
+
+    @LogParam
+    private static String testReturn(String name) {
+        //                if (System.currentTimeMillis() > 0) {
+        //                    return "1";
+        //                } else return "2";
+
+        //                synchronized (Main.class) {
+        //                    return "111";
+        //                }
+
+        //                for (char c : name.toCharArray()) {
+        //                    if (c == 'c') return "ccccc";
+        //                    else return "no ccccc";
+        //                }
+
+        //        if (name.length() > 3) return ">3";
+        //
+        //        new ArrayList<>().get(0);
+        switch (name.length()) {
+            case 1:
+                return String.valueOf(System.currentTimeMillis());
+            case 2:
+                String time = "当前时间: " + System.currentTimeMillis();
+                System.err.println("case内部打印!");
+                return time;
+            case 3:
+            default:
+                return "default !!";
+        }
+        //        return "def";
     }
 
     //    @LogParam
@@ -49,46 +82,15 @@ public class Main {
         return param1 + " + " + param2;
     }
 
+    @LogParam
+    private static void testNo() {
+        System.err.println("~~~");
+    }
+
 
     //    @LogParam
     private static String test3(String... strings) {
         return " ===";
-    }
-
-    @LogParam
-    private static String testReturn(String name) {
-        //        if (System.currentTimeMillis() > 0) {
-        //            return "1";
-        //        } else return "2";
-
-        //        synchronized (Main.class) {
-        //            return "111";
-        //        }
-
-        //        for (char c : name.toCharArray()) {
-        //            if (c == 'c') return "ccccc";
-        //            else return "no ccccc";
-        //        }
-
-        if (name.length() > 3) return ">3";
-
-        new ArrayList<>().get(0);
-        //        switch (name.length()) {
-        //            case 1: {
-        //                System.err.println("~~~");
-        //                return "111";
-        //            }
-        //            case 2:
-        //                String time = String.valueOf(System.currentTimeMillis());
-        //                time += " 123";
-        //                return time;
-        //            case 3:
-        //            default:
-        //                return "default !!";
-        //        }
-
-
-        return "def";
     }
 
 

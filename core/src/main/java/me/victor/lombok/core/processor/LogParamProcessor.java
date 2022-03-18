@@ -20,7 +20,9 @@ import com.sun.tools.javac.util.Names;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -98,12 +100,19 @@ public class LogParamProcessor extends AbstractProcessor {
         insertLogLogic(classDecl, methodDecl, getLoggerName(classDecl));
     }
 
-
     private String getLoggerName(JCTree.JCClassDecl classDecl) {
+        Predicate<JCTree.JCVariableDecl> matchFieldPredicate = it -> {
+            if (it.vartype instanceof JCTree.JCIdent) {
+                return Objects.equals(it.vartype.type.toString(), CSPSLogger.class.getCanonicalName());
+            } else if (it.vartype instanceof JCTree.JCFieldAccess) {
+                return Objects.equals(it.vartype.toString(), CSPSLogger.class.getCanonicalName());
+            }
+            return false;
+        };
         return classDecl.defs.stream()
                 .filter(it -> it.getKind() == Tree.Kind.VARIABLE)
                 .map(it -> (JCTree.JCVariableDecl) it)
-                .filter(it -> it.vartype.toString().contains(CSPSLogger.class.getSimpleName()))
+                .filter(matchFieldPredicate)
                 .findFirst()
                 .map(it -> it.name.toString())
                 .orElseGet(() -> createPoinLogField(classDecl));
@@ -129,12 +138,55 @@ public class LogParamProcessor extends AbstractProcessor {
 
     private void insertLogLogic(JCTree.JCClassDecl classDecl, JCTree.JCMethodDecl methodDecl, String loggerName) {
         String prefix = String.format(LOGGER_PREFIX, classDecl.name, methodDecl.name);
-        handleTryLogic(methodDecl, loggerName, prefix);
+        handleReturnLogic(methodDecl, loggerName, prefix);
         handleParamLogic(methodDecl, loggerName, prefix);
-        handleReturnLogic(methodDecl);
     }
 
-    private void handleReturnLogic(JCTree.JCMethodDecl methodDecl) {
+    private void handleParamLogic(JCTree.JCMethodDecl methodDecl, String loggerName, String loggerPrefix) {
+        if (methodDecl.params.isEmpty()) {
+            //方法无入参, 无需处理入参打印
+            return;
+        }
+        java.util.List<JCTree.JCExpression> params = methodDecl.params.stream()
+                .map(it -> treeMaker.Binary(
+                        JCTree.Tag.PLUS,
+                        treeMaker.Literal(it.name + "="),
+                        handleParamToString(it))
+                )
+                .collect(Collectors.toList());
+        java.util.List<JCTree.JCExpression> joinParams = new ArrayList<>();
+        joinParams.add(treeMaker.Literal(", "));
+        joinParams.addAll(params);
+        JCTree.JCMethodInvocation stringJoin = treeMaker.Apply(
+                List.nil(),
+                chainDots(String.class.getCanonicalName() + ".join"),
+                List.from(joinParams)
+        );
+        JCTree.JCExpression infoParam = treeMaker.Binary(
+                JCTree.Tag.PLUS,
+                treeMaker.Literal(loggerPrefix + "args: "),
+                stringJoin
+        );
+        JCTree.JCExpressionStatement statement = treeMaker.Exec(treeMaker.Apply(
+                List.nil(),
+                chainDots(loggerName + ".info"),
+                List.of(infoParam)
+        ));
+        methodDecl.body.stats = methodDecl.body.stats.prepend(statement);
+    }
+
+    private void handleReturnLogic(JCTree.JCMethodDecl methodDecl, String loggerName, String loggerPrefix) {
+        if (methodDecl.restype.type instanceof Type.JCVoidType) {
+            //方法返回类型void, 无需处理返回值打印
+            return;
+        }
+        JCTree.JCVariableDecl retValDef = treeMaker.VarDef(
+                treeMaker.Modifiers(0),
+                names.fromString(RETURN_VAL),
+                chainDots(methodDecl.restype.type.toString()),
+                treeMaker.Literal(TypeTag.BOT, null)
+        );
+        methodDecl.body.stats = methodDecl.body.stats.prepend(retValDef);
         methodDecl.accept(new TreeTranslator() {
             @Override
             public void visitBlock(JCTree.JCBlock jcBlock) {
@@ -151,8 +203,17 @@ public class LogParamProcessor extends AbstractProcessor {
                                 treeMaker.Ident(names.fromString(RETURN_VAL)),
                                 jcReturn.getExpression()
                         ));
+                        JCTree.JCExpressionStatement logExec = treeMaker.Exec(treeMaker.Apply(
+                                List.nil(),
+                                chainDots(loggerName + ".info"),
+                                List.of(treeMaker.Binary(
+                                        JCTree.Tag.PLUS,
+                                        treeMaker.Literal(loggerPrefix + "return: "),
+                                        treeMaker.Ident(names.fromString(RETURN_VAL))
+                                ))
+                        ));
                         JCTree.JCReturn returnStat = treeMaker.Return(treeMaker.Ident(names.fromString(RETURN_VAL)));
-                        buffer.appendList(List.of(assign, returnStat));
+                        buffer.appendList(List.of(assign, logExec, returnStat));
                     } else {
                         buffer.append(stat);
                     }
@@ -180,67 +241,6 @@ public class LogParamProcessor extends AbstractProcessor {
                 super.visitCase(jcCase);
             }
         });
-    }
-
-    private void handleParamLogic(JCTree.JCMethodDecl methodDecl, String loggerName, String loggerPrefix) {
-        if (!methodDecl.params.isEmpty()) {
-            //方法有入参, 处理打印入参逻辑
-            java.util.List<JCTree.JCExpression> params = methodDecl.params.stream()
-                    .map(it -> treeMaker.Binary(
-                            JCTree.Tag.PLUS,
-                            treeMaker.Literal(it.name + "="),
-                            handleParamToString(it))
-                    )
-                    .collect(Collectors.toList());
-            java.util.List<JCTree.JCExpression> joinParams = new ArrayList<>();
-            joinParams.add(treeMaker.Literal(", "));
-            joinParams.addAll(params);
-            JCTree.JCMethodInvocation stringJoin = treeMaker.Apply(
-                    List.nil(),
-                    chainDots(String.class.getCanonicalName() + ".join"),
-                    List.from(joinParams)
-            );
-            JCTree.JCExpression infoParam = treeMaker.Binary(
-                    JCTree.Tag.PLUS,
-                    treeMaker.Literal(loggerPrefix + "args: "),
-                    stringJoin
-            );
-            JCTree.JCExpressionStatement statement = treeMaker.Exec(treeMaker.Apply(
-                    List.nil(),
-                    chainDots(loggerName + ".info"),
-                    List.of(infoParam)
-            ));
-            methodDecl.body.stats = methodDecl.body.stats.prepend(statement);
-        }
-    }
-
-    private void handleTryLogic(JCTree.JCMethodDecl methodDecl, String loggerName, String loggerPrefix) {
-        if (!(methodDecl.restype.type instanceof Type.JCVoidType)) {
-            List<JCTree.JCStatement> stats = methodDecl.body.stats;
-            //非void方法, 处理打印返回值逻辑
-            JCTree.JCTry jcTry = treeMaker.Try(
-                    treeMaker.Block(0, stats),
-                    List.nil(),
-                    treeMaker.Block(0, List.of(treeMaker.Exec(treeMaker.Apply(
-                            List.nil(),
-                            chainDots(loggerName + ".info"),
-                            List.of(treeMaker.Binary(
-                                    JCTree.Tag.PLUS,
-                                    treeMaker.Literal(loggerPrefix + "return: "),
-                                    treeMaker.Ident(names.fromString(RETURN_VAL))
-                            ))
-                    ))))
-            );
-            ListBuffer<JCTree.JCStatement> buffer = new ListBuffer<>();
-            buffer.add(treeMaker.VarDef(
-                    treeMaker.Modifiers(0),
-                    names.fromString(RETURN_VAL),
-                    chainDots(methodDecl.restype.type.toString()),
-                    treeMaker.Literal(TypeTag.BOT, null)
-            ));
-            buffer.add(jcTry);
-            methodDecl.body.stats = buffer.toList();
-        }
     }
 
     private JCTree.JCExpression handleParamToString(JCTree.JCVariableDecl it) {

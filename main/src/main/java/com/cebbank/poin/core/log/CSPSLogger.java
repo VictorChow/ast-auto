@@ -10,7 +10,7 @@ public class CSPSLogger {
     }
 
     public void info(Object o) {
-        System.err.println(o);
+        System.out.println(o);
     }
 
     public void test() {

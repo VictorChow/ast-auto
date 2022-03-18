@@ -1,5 +1,7 @@
 package me;
 
+import com.kangyonggan.methodlogger.MethodLogger;
+
 import me.victor.lombok.core.annotation.LogParam;
 
 /**
@@ -20,11 +22,13 @@ public class Main {
         //        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
         //        test2(123);
         //        test3("1", "2", "3");
-        System.err.println("结果:" + testReturn("12"));
+        //        System.err.println("结果:" + testReturn("12"));
+        test("1", "2");
     }
 
     @LogParam
     private static String testReturn(String name) {
+        System.err.println("===");
         //                if (System.currentTimeMillis() > 0) {
         //                    return "1";
         //                } else return "2";
@@ -38,7 +42,7 @@ public class Main {
         //                    else return "no ccccc";
         //                }
 
-        //        if (name.length() > 3) return ">3";
+        if (name.length() > 3) return ">3";
         //
         //        new ArrayList<>().get(0);
         switch (name.length()) {
@@ -55,14 +59,10 @@ public class Main {
         //        return "def";
     }
 
-    //    @LogParam
+    @LogParam
     public static String test(Object param1, Object param2) {
-        if (param1 == null) {
-            return String.valueOf(param2);
-        }
-        if (param2 == null) {
-            return String.valueOf(param1);
-        }
+        if (param1 == null) return String.valueOf(param2);
+        if (param2 == null) return String.valueOf(param1);
         return param1 + " + " + param2;
     }
 
@@ -71,7 +71,7 @@ public class Main {
         System.err.println(age);
     }
 
-    //    @MethodLogger
+    @MethodLogger
     public static String test2(Object param1, Object param2) {
         if (param1 == null) {
             return String.valueOf(param2);
@@ -82,7 +82,7 @@ public class Main {
         return param1 + " + " + param2;
     }
 
-    @LogParam
+    //    @LogParam
     private static void testNo() {
         System.err.println("~~~");
     }

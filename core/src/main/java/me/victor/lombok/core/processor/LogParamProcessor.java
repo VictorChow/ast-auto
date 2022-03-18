@@ -1,7 +1,7 @@
 package me.victor.lombok.core.processor;
 
-import com.cebbank.poin.core.log.CSPSLogFactory;
-import com.cebbank.poin.core.log.CSPSLogger;
+import com.log.LogFactory;
+import com.log.Logger;
 import com.google.auto.service.AutoService;
 import com.sun.source.tree.Tree;
 import com.sun.tools.javac.api.JavacTrees;
@@ -103,9 +103,9 @@ public class LogParamProcessor extends AbstractProcessor {
     private String getLoggerName(JCTree.JCClassDecl classDecl) {
         Predicate<JCTree.JCVariableDecl> matchFieldPredicate = it -> {
             if (it.vartype instanceof JCTree.JCIdent) {
-                return Objects.equals(it.vartype.type.toString(), CSPSLogger.class.getCanonicalName());
+                return Objects.equals(it.vartype.type.toString(), Logger.class.getCanonicalName());
             } else if (it.vartype instanceof JCTree.JCFieldAccess) {
-                return Objects.equals(it.vartype.toString(), CSPSLogger.class.getCanonicalName());
+                return Objects.equals(it.vartype.toString(), Logger.class.getCanonicalName());
             }
             return false;
         };
@@ -115,12 +115,12 @@ public class LogParamProcessor extends AbstractProcessor {
                 .filter(matchFieldPredicate)
                 .findFirst()
                 .map(it -> it.name.toString())
-                .orElseGet(() -> createPoinLogField(classDecl));
+                .orElseGet(() -> createLogField(classDecl));
     }
 
-    private String createPoinLogField(JCTree.JCClassDecl classDecl) {
+    private String createLogField(JCTree.JCClassDecl classDecl) {
         String defaultLoggerName = "logger";
-        String statement = CSPSLogFactory.class.getCanonicalName() + ".get";
+        String statement = LogFactory.class.getCanonicalName() + ".get";
         JCTree.JCMethodInvocation loggerInit = treeMaker.Apply(
                 List.nil(),
                 chainDots(statement),
@@ -129,7 +129,7 @@ public class LogParamProcessor extends AbstractProcessor {
         JCTree.JCVariableDecl loggerDef = treeMaker.VarDef(
                 treeMaker.Modifiers(Flags.PRIVATE | Flags.STATIC | Flags.FINAL),
                 names.fromString(defaultLoggerName),
-                chainDots(CSPSLogger.class.getCanonicalName()),
+                chainDots(Logger.class.getCanonicalName()),
                 loggerInit
         );
         classDecl.defs = classDecl.defs.prepend(loggerDef);

@@ -1,12 +1,12 @@
-package com.cebbank.poin.core.log;
+package com.log;
 
 /**
  * Created by victor on 2022/3/15. (ง •̀_•́)ง
  */
 
-public class CSPSLogger {
+public class Logger {
 
-    public CSPSLogger(Class<?> clazz) {
+    public Logger(Class<?> clazz) {
     }
 
     public void info(Object o) {

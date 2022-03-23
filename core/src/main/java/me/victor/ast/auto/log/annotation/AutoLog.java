@@ -1,4 +1,4 @@
-package me.victor.lombok.core.annotation;
+package me.victor.ast.auto.log.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -13,5 +13,4 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Documented
-public @interface LogParam {
-}
+public @interface AutoLog {}

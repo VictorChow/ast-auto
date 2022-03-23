@@ -1,14 +1,13 @@
 package me;
 
-import com.kangyonggan.methodlogger.MethodLogger;
+import java.util.Random;
 
-import me.victor.lombok.core.annotation.LogParam;
+import me.victor.ast.auto.log.annotation.AutoLog;
 
 /**
  * Created by victor on 2022/3/15. (ง •̀_•́)ง
  */
-
-//@LogParam
+@AutoLog
 public class Main {
     //    private static final CSPSLogger log = CSPSLogFactory.get(Main.class);
 
@@ -16,7 +15,7 @@ public class Main {
     private java.lang.String name;
     private String name2;
 
-    //    @LogParam
+    //    @AutoLog
     public static void main(String[] args) {
         //        System.err.println(args.getClass().isArray());
         //        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
@@ -26,7 +25,7 @@ public class Main {
         test("1", "2");
     }
 
-    @LogParam
+    //    @AutoLog
     private static String testReturn(String name) {
         System.err.println("===");
         //                if (System.currentTimeMillis() > 0) {
@@ -59,7 +58,7 @@ public class Main {
         //        return "def";
     }
 
-    @LogParam
+    //    @AutoLog
     public static String test(Object param1, Object param2) {
         if (param1 == null) return String.valueOf(param2);
         if (param2 == null) return String.valueOf(param1);
@@ -71,7 +70,7 @@ public class Main {
         System.err.println(age);
     }
 
-    @MethodLogger
+    //    @MethodLogger
     public static String test2(Object param1, Object param2) {
         if (param1 == null) {
             return String.valueOf(param2);
@@ -82,13 +81,44 @@ public class Main {
         return param1 + " + " + param2;
     }
 
-    //    @LogParam
+    @AutoLog
     private static void testNo() {
         System.err.println("~~~");
     }
 
+    @AutoLog
+    private static String testNo2() {
+        System.err.println("~~~");
+        return new Random().nextBoolean() + "";
+    }
 
-    //    @LogParam
+    //    @AutoLog
+    private static char testNo3(int age) {
+        System.err.println("~~~");
+        return '2';
+    }
+
+    //    @AutoLog
+    private static boolean testNo4(int[] age) {
+        return new Random().nextBoolean();
+    }
+
+
+    private static void testNo5(char[] age) {
+        System.err.println("````````````");
+    }
+
+    private static int testNo5(byte age) {
+        System.err.println("````````````");
+        return 1;
+    }
+
+    private static byte testNo6() {
+        System.err.println("````````````");
+        return 1;
+    }
+
+    //    @AutoLog
     private static String test3(String... strings) {
         return " ===";
     }

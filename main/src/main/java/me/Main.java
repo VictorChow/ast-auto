@@ -15,7 +15,7 @@ public class Main {
     private java.lang.String name;
     private String name2;
 
-    //    @AutoLog
+    //        @AutoLog
     public static void main(String[] args) {
         //        System.err.println(args.getClass().isArray());
         //        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
@@ -23,9 +23,16 @@ public class Main {
         //        test3("1", "2", "3");
         //        System.err.println("结果:" + testReturn("12"));
         test("1", "2");
+
+        try {
+            throw new RuntimeException();
+        } finally {
+            System.err.println("finally 返回");
+            System.err.println("finally ~~~~~~~~");
+        }
     }
 
-    //    @AutoLog
+    @AutoLog
     private static String testReturn(String name) {
         System.err.println("===");
         //                if (System.currentTimeMillis() > 0) {
@@ -81,12 +88,12 @@ public class Main {
         return param1 + " + " + param2;
     }
 
-    @AutoLog
+    //    @AutoLog
     private static void testNo() {
         System.err.println("~~~");
     }
 
-    @AutoLog
+    //    @AutoLog
     private static String testNo2() {
         System.err.println("~~~");
         return new Random().nextBoolean() + "";
@@ -104,13 +111,23 @@ public class Main {
     }
 
 
+    //    @AutoLog
     private static void testNo5(char[] age) {
+        if (age == null) {
+            System.err.println("null");
+            return;
+        }
         System.err.println("````````````");
+    }
+
+    //    @AutoLog
+    private static void testNo6(char[] age) {
+        throw new RuntimeException();
     }
 
     private static int testNo5(byte age) {
         System.err.println("````````````");
-        return 1;
+        return 111111;
     }
 
     private static byte testNo6() {

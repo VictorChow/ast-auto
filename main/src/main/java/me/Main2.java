@@ -12,7 +12,7 @@ public class Main2 {
         test("1111", "2222");
         test("aaa", "bbb");
         test("aaa", "bbb");
-        test("aaa", "bbb");
+//        test("aaa", "bbb");
     }
 
     @AutoLog

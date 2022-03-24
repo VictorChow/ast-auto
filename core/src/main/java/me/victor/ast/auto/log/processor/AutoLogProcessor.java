@@ -36,8 +36,8 @@ import javax.lang.model.element.TypeElement;
 import javax.tools.Diagnostic;
 
 import me.victor.ast.auto.log.Arg;
-import me.victor.ast.auto.log.logger.AutoLogAdapter;
 import me.victor.ast.auto.log.annotation.AutoLog;
+import me.victor.ast.auto.log.logger.AutoLogAdapter;
 
 /**
  * Created by victor on 2022/3/16. (ง •̀_•́)ง
@@ -125,65 +125,16 @@ public class AutoLogProcessor extends AbstractProcessor {
 
     private void insertLogLogic(JCTree.JCClassDecl classDecl, JCTree.JCMethodDecl methodDecl) {
         String logPrefix = String.format(LOGGER_PREFIX, classDecl.name, methodDecl.name);
+        wrapSingleStatementToBlock(methodDecl);
+        //先包装try...finally再定义time变量, 不然time变量被包在try中导致finally里获取不到time变量
+        handleTimeLogic(methodDecl, logPrefix);
         handleReturnLogic(methodDecl, logPrefix);
+        //处理参数的放在最后保证时间戳获取在方法的第一行, 时间比较精确
         handleArgsLogic(methodDecl, logPrefix);
     }
 
-    private void handleReturnLogic(JCTree.JCMethodDecl methodDecl, String logPrefix) {
-        if (methodDecl.restype.type instanceof Type.JCVoidType) {
-            //方法返回类型void, 在最后一行添加logTime, 非void的方法在return处理逻辑中已添加打印logTime
-            methodDecl.body.stats = methodDecl.body.stats.append(makeLogTimeStatement(logPrefix));
-            return;
-        }
-        String returnType = methodDecl.restype.type.toString();
-        JCTree.JCExpression retTypeExp;
-        JCTree.JCExpression retValueExp;
-        if (retInitVal.containsKey(returnType)) {
-            retTypeExp = maker.TypeIdent(retType.get(returnType));
-            retValueExp = retInitVal.get(returnType).get();
-        } else {
-            retTypeExp = chainDots(returnType);
-            retValueExp = maker.Literal(TypeTag.BOT, null);
-        }
-        JCTree.JCVariableDecl retValDef = maker.VarDef(
-                maker.Modifiers(0),
-                names.fromString(RETURN_VAL),
-                retTypeExp,
-                retValueExp
-        );
-        methodDecl.body.stats = methodDecl.body.stats.prepend(retValDef);
+    private void wrapSingleStatementToBlock(JCTree.JCMethodDecl methodDecl) {
         methodDecl.accept(new TreeTranslator() {
-            @Override
-            public void visitBlock(JCTree.JCBlock jcBlock) {
-                super.visitBlock(jcBlock);
-                List<JCTree.JCStatement> blockStats = jcBlock.stats;
-                if (blockStats == null || blockStats.isEmpty()) {
-                    return;
-                }
-                ListBuffer<JCTree.JCStatement> buffer = new ListBuffer<>();
-                for (JCTree.JCStatement stat : blockStats) {
-                    if (stat instanceof JCTree.JCReturn) {
-                        JCTree.JCReturn jcReturn = (JCTree.JCReturn) stat;
-                        JCTree.JCExpressionStatement assign = maker.Exec(maker.Assign(
-                                maker.Ident(names.fromString(RETURN_VAL)),
-                                jcReturn.getExpression()
-                        ));
-                        JCTree.JCExpressionStatement logExec = maker.Exec(maker.Apply(
-                                List.nil(),
-                                chainDots(AutoLogAdapter.class.getCanonicalName() + ".logReturn"),
-                                List.of(maker.Literal(logPrefix + "return: "),
-                                        maker.Ident(names.fromString(RETURN_VAL)))
-                        ));
-                        JCTree.JCReturn returnStat = maker.Return(maker.Ident(names.fromString(RETURN_VAL)));
-                        JCTree.JCExpressionStatement logTimeStat = makeLogTimeStatement(logPrefix);
-                        buffer.appendList(List.of(assign, logExec, logTimeStat, returnStat));
-                    } else {
-                        buffer.append(stat);
-                    }
-                }
-                jcBlock.stats = buffer.toList();
-            }
-
             @Override
             public void visitIf(JCTree.JCIf jcIf) {
                 if (jcIf.thenpart != null && !(jcIf.thenpart instanceof JCTree.JCBlock)) {
@@ -239,6 +190,76 @@ public class AutoLogProcessor extends AbstractProcessor {
                 List.of(maker.Literal(logPrefix + "args: "), asList)
         ));
         methodDecl.body.stats = methodDecl.body.stats.prependList(List.of(timeVarDef, logArgStat));
+    }
+
+    private void handleReturnLogic(JCTree.JCMethodDecl methodDecl, String logPrefix) {
+        if (methodDecl.restype.type instanceof Type.JCVoidType) {
+            //方法返回类型void, 不处理return打印
+            return;
+        }
+        String returnType = methodDecl.restype.type.toString();
+        JCTree.JCExpression retTypeExp;
+        JCTree.JCExpression retValueExp;
+        if (retInitVal.containsKey(returnType)) {
+            retTypeExp = maker.TypeIdent(retType.get(returnType));
+            retValueExp = retInitVal.get(returnType).get();
+        } else {
+            retTypeExp = chainDots(returnType);
+            retValueExp = maker.Literal(TypeTag.BOT, null);
+        }
+        JCTree.JCVariableDecl retValDef = maker.VarDef(
+                maker.Modifiers(0),
+                names.fromString(RETURN_VAL),
+                retTypeExp,
+                retValueExp
+        );
+        methodDecl.body.stats = methodDecl.body.stats.prepend(retValDef);
+        methodDecl.accept(new TreeTranslator() {
+            @Override
+            public void visitBlock(JCTree.JCBlock jcBlock) {
+                super.visitBlock(jcBlock);
+                List<JCTree.JCStatement> blockStats = jcBlock.stats;
+                if (blockStats == null || blockStats.isEmpty()) {
+                    return;
+                }
+                ListBuffer<JCTree.JCStatement> buffer = new ListBuffer<>();
+                for (JCTree.JCStatement stat : blockStats) {
+                    if (stat instanceof JCTree.JCReturn) {
+                        JCTree.JCReturn jcReturn = (JCTree.JCReturn) stat;
+                        JCTree.JCExpressionStatement assign = maker.Exec(maker.Assign(
+                                maker.Ident(names.fromString(RETURN_VAL)),
+                                jcReturn.getExpression()
+                        ));
+                        JCTree.JCReturn returnStat = maker.Return(maker.Ident(names.fromString(RETURN_VAL)));
+                        buffer.appendList(List.of(assign, returnStat));
+                    } else {
+                        buffer.append(stat);
+                    }
+                }
+                jcBlock.stats = buffer.toList();
+            }
+        });
+    }
+
+    private void handleTimeLogic(JCTree.JCMethodDecl methodDecl, String logPrefix) {
+        List<JCTree.JCStatement> stats = methodDecl.restype.type instanceof Type.JCVoidType
+                ? List.of(makeLogTimeStatement(logPrefix))
+                : List.of(makeLogReturnStatement(logPrefix), makeLogTimeStatement(logPrefix));
+        methodDecl.body = maker.Block(0,
+                List.of(maker.Try(
+                        methodDecl.body,
+                        List.nil(),
+                        maker.Block(0, stats)
+                )));
+    }
+
+    private JCTree.JCExpressionStatement makeLogReturnStatement(String logPrefix) {
+        return maker.Exec(maker.Apply(
+                List.nil(),
+                chainDots(AutoLogAdapter.class.getCanonicalName() + ".logReturn"),
+                List.of(maker.Literal(logPrefix + "return: "),
+                        maker.Ident(names.fromString(RETURN_VAL)))
+        ));
     }
 
     private JCTree.JCExpressionStatement makeLogTimeStatement(String logPrefix) {

@@ -39,4 +39,8 @@ public class AutoLogAdapter {
     public static void logTime(String methodTag, long millisecond) {
         logger.logTime(methodTag, millisecond);
     }
+    public static String toJson(Object o) {
+        return logger.toJson(o);
+    }
+
 }

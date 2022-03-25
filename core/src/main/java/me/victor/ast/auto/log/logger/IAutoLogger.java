@@ -15,4 +15,6 @@ public interface IAutoLogger {
     void logReturn(String methodTag, Object retVal);
 
     void logTime(String methodTag, long millisecond);
+
+    String toJson(Object object);
 }

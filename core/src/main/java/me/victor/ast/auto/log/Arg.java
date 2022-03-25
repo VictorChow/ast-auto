@@ -1,5 +1,9 @@
 package me.victor.ast.auto.log;
 
+import com.google.auto.service.AutoService;
+import me.victor.ast.auto.log.annotation.FormatType;
+import me.victor.ast.auto.log.logger.AutoLogAdapter;
+
 import java.util.Arrays;
 
 /**
@@ -9,10 +13,12 @@ public class Arg {
 
     private final String name;
     private final Object value;
+    private final FormatType formatType;
 
-    public Arg(String name, Object value) {
+    public Arg(String name, Object value, FormatType formatType) {
         this.name = name;
         this.value = value;
+        this.formatType = formatType;
     }
 
     public String getName() {
@@ -23,11 +29,18 @@ public class Arg {
         return value;
     }
 
+    public FormatType getFormatType() {
+        return formatType;
+    }
+
     @Override
     public String toString() {
-        String valueStr = value != null && value.getClass().isArray()
+        return name + "=" + (formatType == FormatType.JSON ? AutoLogAdapter.toJson(value) : plainString());
+    }
+
+    private String plainString() {
+        return value != null && value.getClass().isArray()
                 ? Arrays.toString((Object[]) value)
                 : String.valueOf(value);
-        return name + "=" + valueStr;
     }
 }

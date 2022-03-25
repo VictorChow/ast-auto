@@ -128,7 +128,7 @@ public class AutoLogProcessor extends AbstractProcessor {
         wrapSingleStatementToBlock(methodDecl);
         //先包装try...finally再定义time变量, 不然time变量被包在try中导致finally里获取不到time变量
         handleTimeLogic(methodDecl, logPrefix);
-        handleReturnLogic(methodDecl, logPrefix);
+        handleReturnLogic(methodDecl);
         //处理参数的放在最后保证时间戳获取在方法的第一行, 时间比较精确
         handleArgsLogic(methodDecl, logPrefix);
     }
@@ -188,12 +188,12 @@ public class AutoLogProcessor extends AbstractProcessor {
         methodDecl.body.stats = methodDecl.body.stats.prependList(List.of(timeVarDef, logArgStat));
     }
 
-    private void handleReturnLogic(JCTree.JCMethodDecl methodDecl, String logPrefix) {
+    private void handleReturnLogic(JCTree.JCMethodDecl methodDecl) {
         if (methodDecl.restype.type instanceof Type.JCVoidType) {
             //方法返回类型void, 不处理return打印
             return;
         }
-        String returnType = methodDecl.restype.type.toString();
+        String returnType = methodDecl.restype.type.toString().replaceAll("<.*>", "");
         JCTree.JCExpression retTypeExp;
         JCTree.JCExpression retValueExp;
         if (retInitVal.containsKey(returnType)) {

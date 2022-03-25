@@ -20,7 +20,7 @@ public class Main2 {
         test("张三", 20);
     }
 
-    @AutoLog
+//    @AutoLog
     private static String test(String a, String b) {
         System.out.println("业务逻辑:" + a + " " + b);
         try {
@@ -31,7 +31,7 @@ public class Main2 {
         return "Victor" + System.currentTimeMillis();
     }
 
-    @AutoLog
+//    @AutoLog
     private static Student test(String name, int age) {
         if (name == null) return new Student("无名", 0);
         if (age > 100) {

@@ -7,7 +7,7 @@ import me.victor.ast.auto.log.annotation.AutoLog;
 /**
  * Created by victor on 2022/3/15. (ง •̀_•́)ง
  */
-@AutoLog
+//@AutoLog
 public class Main {
     //    private static final CSPSLogger log = CSPSLogFactory.get(Main.class);
 
@@ -32,7 +32,7 @@ public class Main {
         }
     }
 
-    @AutoLog
+//    @AutoLog
     private static String testReturn(String name) {
         System.err.println("===");
         //                if (System.currentTimeMillis() > 0) {

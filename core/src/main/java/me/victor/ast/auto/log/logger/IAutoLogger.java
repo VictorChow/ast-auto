@@ -1,7 +1,5 @@
 package me.victor.ast.auto.log.logger;
 
-import java.util.List;
-
 import me.victor.ast.auto.log.Arg;
 
 /**
@@ -10,7 +8,7 @@ import me.victor.ast.auto.log.Arg;
 
 public interface IAutoLogger {
 
-    void logArgs(String methodTag, List<Arg> args);
+    void logArgs(String methodTag, Arg... args);
 
     void logReturn(String methodTag, Object retVal);
 

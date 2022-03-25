@@ -10,6 +10,6 @@ public class Logger {
     }
 
     public void info(Object o) {
-        System.err.println("打印: " + o);
+        System.err.println(o);
     }
 }

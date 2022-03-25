@@ -1,5 +1,6 @@
 package me.victor.ast.auto.log.logger;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -12,8 +13,8 @@ import me.victor.ast.auto.log.Arg;
 public class SystemOutLoggerAdapter implements IAutoLogger {
 
     @Override
-    public void logArgs(String methodTag, List<Arg> args) {
-        System.out.println(methodTag + args.stream()
+    public void logArgs(String methodTag, Arg... args) {
+        System.out.println(methodTag + Arrays.stream(args)
                 .map(String::valueOf)
                 .collect(Collectors.joining(", ")));
     }

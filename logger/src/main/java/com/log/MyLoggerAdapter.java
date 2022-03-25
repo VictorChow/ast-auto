@@ -3,7 +3,7 @@ package com.log;
 
 import com.google.auto.service.AutoService;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.stream.Collectors;
 
 import me.victor.ast.auto.log.Arg;
@@ -19,8 +19,8 @@ public class MyLoggerAdapter implements IAutoLogger {
     private static final Logger logger = LogFactory.get(MyLoggerAdapter.class);
 
     @Override
-    public void logArgs(String methodTag, List<Arg> args) {
-        logger.info(methodTag + args.stream()
+    public void logArgs(String methodTag, Arg... args) {
+        logger.info(methodTag + Arrays.stream(args)
                 .map(String::valueOf)
                 .collect(Collectors.joining(", ")));
     }

@@ -1,7 +1,6 @@
 package me.victor.ast.auto.log.logger;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.ServiceLoader;
 
 import me.victor.ast.auto.log.Arg;
@@ -28,7 +27,7 @@ public class AutoLogAdapter {
         throw new UnsupportedOperationException();
     }
 
-    public static void logArgs(String methodTag, List<Arg> args) {
+    public static void logArgs(String methodTag, Arg... args) {
         logger.logArgs(methodTag, args);
     }
 

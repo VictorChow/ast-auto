@@ -1,5 +1,7 @@
 package me;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import me.victor.ast.auto.log.annotation.AutoLog;
 
 /**
@@ -9,10 +11,13 @@ import me.victor.ast.auto.log.annotation.AutoLog;
 public class Main2 {
 
     public static void main(String[] args) {
-        test("1111", "2222");
-        test("aaa", "bbb");
-        test("aaa", "bbb");
-//        test("aaa", "bbb");
+        //        test("1111", "2222");
+        //        test("aaa", "bbb");
+        //        test("aaa", "bbb");
+        //        test("aaa", "bbb");
+
+//        test("张三", 20);
+        test("张三", 20);
     }
 
     @AutoLog
@@ -24,5 +29,21 @@ public class Main2 {
             e.printStackTrace();
         }
         return "Victor" + System.currentTimeMillis();
+    }
+
+    @AutoLog
+    private static Student test(String name, int age) {
+        if (name == null) return new Student("无名", 0);
+        if (age > 100) {
+            throw new IllegalArgumentException("太老了");
+        }
+        return new Student(name, age);
+    }
+
+    @Data
+    @AllArgsConstructor
+    private static class Student {
+        private String stuName;
+        private int stuAge;
     }
 }

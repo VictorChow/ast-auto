@@ -179,15 +179,11 @@ public class AutoLogProcessor extends AbstractProcessor {
                         null
                 ))
                 .collect(Collectors.toList());
-        JCTree.JCMethodInvocation asList = maker.Apply(
-                List.nil(),
-                chainDots(Arrays.class.getCanonicalName() + ".asList"),
-                List.from(args)
-        );
+        List<JCTree.JCExpression> param = List.from(args).prepend(maker.Literal(logPrefix + "args: "));
         JCTree.JCExpressionStatement logArgStat = maker.Exec(maker.Apply(
                 List.nil(),
                 chainDots(AutoLogAdapter.class.getCanonicalName() + ".logArgs"),
-                List.of(maker.Literal(logPrefix + "args: "), asList)
+                param
         ));
         methodDecl.body.stats = methodDecl.body.stats.prependList(List.of(timeVarDef, logArgStat));
     }

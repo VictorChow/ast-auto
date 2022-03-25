@@ -37,6 +37,7 @@ import javax.tools.Diagnostic;
 
 import me.victor.ast.auto.log.Arg;
 import me.victor.ast.auto.log.annotation.AutoLog;
+import me.victor.ast.auto.log.annotation.FormatType;
 import me.victor.ast.auto.log.logger.AutoLogAdapter;
 
 /**
@@ -175,15 +176,24 @@ public class AutoLogProcessor extends AbstractProcessor {
                         null,
                         List.nil(),
                         chainDots(Arg.class.getCanonicalName()),
-                        List.of(maker.Literal(it.name.toString()), maker.Ident(it)),
+                        List.of(maker.Literal(it.name.toString()), maker.Ident(it),
+                                it.mods.annotations.isEmpty() ?
+                                        chainDots(FormatType.class.getCanonicalName()+".STRING") :
+                                        chainDots(FormatType.class.getCanonicalName()+".JSON")),
                         null
                 ))
                 .collect(Collectors.toList());
+        /**
+         * java.util.Arrays.asList(new me.victor.ast.auto.log.Arg("test", test), new me.victor.ast.auto.log.Arg("map", map))
+         * */
         JCTree.JCMethodInvocation asList = maker.Apply(
                 List.nil(),
                 chainDots(Arrays.class.getCanonicalName() + ".asList"),
                 List.from(args)
         );
+        /**
+         * me.victor.ast.auto.log.logger.AutoLogAdapter.logArgs("<Main3.test> args: ", me.victor.ast.auto.log.annotation.LogJSON, java.util.Arrays.asList(new me.victor.ast.auto.log.Arg("test", test), new me.victor.ast.auto.log.Arg("map", map)));
+         * **/
         JCTree.JCExpressionStatement logArgStat = maker.Exec(maker.Apply(
                 List.nil(),
                 chainDots(AutoLogAdapter.class.getCanonicalName() + ".logArgs"),

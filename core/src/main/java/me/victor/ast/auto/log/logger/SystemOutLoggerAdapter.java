@@ -27,4 +27,9 @@ public class SystemOutLoggerAdapter implements IAutoLogger {
     public void logTime(String methodTag, long millisecond) {
         System.out.println(methodTag + millisecond);
     }
+
+    @Override
+    public String toJson(Object object) {
+        return null;
+    }
 }

@@ -1,6 +1,7 @@
 package com.log;
 
 
+import com.alibaba.fastjson.JSON;
 import com.google.auto.service.AutoService;
 
 import java.util.List;
@@ -33,5 +34,10 @@ public class MyLoggerAdapter implements IAutoLogger {
     @Override
     public void logTime(String methodTag, long millisecond) {
         logger.info(methodTag + millisecond);
+    }
+
+    @Override
+    public String toJson(Object object) {
+        return JSON.toJSONString(object);
     }
 }

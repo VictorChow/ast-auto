@@ -9,6 +9,8 @@ import me.victor.ast.auto.log.annotation.AutoLog;
  */
 
 public class Main2 {
+    public static final int a = 1;
+
 
     public static void main(String[] args) {
         //        test("1111", "2222");
@@ -16,11 +18,12 @@ public class Main2 {
         //        test("aaa", "bbb");
         //        test("aaa", "bbb");
 
-//        test("张三", 20);
         test("张三", 20);
+        test(null, 10);
+        test("李四", 101);
     }
 
-//    @AutoLog
+    //    @AutoLog
     private static String test(String a, String b) {
         System.out.println("业务逻辑:" + a + " " + b);
         try {
@@ -31,7 +34,7 @@ public class Main2 {
         return "Victor" + System.currentTimeMillis();
     }
 
-//    @AutoLog
+    @AutoLog
     private static Student test(String name, int age) {
         if (name == null) return new Student("无名", 0);
         if (age > 100) {

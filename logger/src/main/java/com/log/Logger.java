@@ -10,6 +10,6 @@ public class Logger {
     }
 
     public void info(Object o) {
-        System.err.println(o);
+        System.out.println(o);
     }
 }

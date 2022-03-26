@@ -117,7 +117,7 @@ public class AutoLogProcessor extends AbstractProcessor {
     private void handleMethods(JCTree.JCMethodDecl methodDecl) {
         JCTree.JCClassDecl classDecl = (JCTree.JCClassDecl) trees.getTree(methodDecl.sym.owner);
         if (symbols.contains(classDecl)) {
-            //标记在类上的注解已经处理所以方法, 无需在标记方法上再次处理
+            //标记在类上的注解已经处理所有方法, 无需在标记方法上再次处理
             return;
         }
         insertLogLogic(classDecl, methodDecl);
@@ -193,6 +193,7 @@ public class AutoLogProcessor extends AbstractProcessor {
             //方法返回类型void, 不处理return打印
             return;
         }
+        //去除泛型<...>
         String returnType = methodDecl.restype.type.toString().replaceAll("<.*>", "");
         JCTree.JCExpression retTypeExp;
         JCTree.JCExpression retValueExp;

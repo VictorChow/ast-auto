@@ -13,7 +13,11 @@ public class Main3 {
 
     public static void main(String[] args) {
         //        System.out.println("java.util.List<Map<String, List<String>>".replaceAll("<.*>", ""));
-        test(new ArrayList<>());
+//        test(new ArrayList<>());
+
+        Class<Main2> main2Class = Main2.class;
+        System.err.println(Main2.a);
+        
     }
 
     @AutoLog

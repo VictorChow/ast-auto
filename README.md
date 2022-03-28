@@ -41,11 +41,11 @@ private Student test(String name, int age) {
             throw new IllegalArgumentException("太老了");
         }
         $$ret$$ = new Student(name, age);
+        return $$ret$$;
     } finally {
         AutoLogAdapter.logReturn("<Main.test> return: ", $$ret$$);
         AutoLogAdapter.logTime("<Main.test> time: ", System.currentTimeMillis() - $$time$$);
     }
-    return $$ret$$;
 }
 ```
 

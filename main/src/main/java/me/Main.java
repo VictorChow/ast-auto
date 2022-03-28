@@ -16,6 +16,7 @@ public class Main {
     private String name2;
 
     //        @AutoLog
+//    @AutoLog
     public static void main(String[] args) {
         //        System.err.println(args.getClass().isArray());
         //        test(Collections.singletonList(123), Collections.singletonMap("k", "v"));
@@ -32,7 +33,7 @@ public class Main {
         }
     }
 
-//    @AutoLog
+    //    @AutoLog
     private static String testReturn(String name) {
         System.err.println("===");
         //                if (System.currentTimeMillis() > 0) {
@@ -130,13 +131,14 @@ public class Main {
         return 111111;
     }
 
-    private static byte testNo6() {
+//    @AutoLog
+    private static byte testNo6Main1() {
         System.err.println("````````````");
         return 1;
     }
 
-    //    @AutoLog
-    private static String test3(String... strings) {
+//    @AutoLog
+    private static String test3Main1(String... strings) {
         return " ===";
     }
 

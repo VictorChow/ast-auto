@@ -59,4 +59,4 @@ private Student test(String name, int age) {
 
 ## 计划实现功能
 
-正在想
+- [ ] 源码字符串加密

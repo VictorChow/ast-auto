@@ -17,15 +17,15 @@ public class Main3 {
 
         Class<Main2> main2Class = Main2.class;
         System.err.println(Main2.a);
-        
+
     }
 
-    @AutoLog
+//    @AutoLog
     private static Main3 test() {
         return null;
     }
 
-    @AutoLog
+//    @AutoLog
     private static List<String> test(List<String> args) {
 
         List<String> list = new ArrayList<>();

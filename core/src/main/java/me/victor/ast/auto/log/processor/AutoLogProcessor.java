@@ -15,6 +15,7 @@ import com.sun.tools.javac.util.ListBuffer;
 import com.sun.tools.javac.util.Names;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,8 +28,6 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -43,8 +42,6 @@ import me.victor.ast.auto.log.logger.AutoLogAdapter;
  * Created by victor on 2022/3/16. (ง •̀_•́)ง
  */
 @AutoService(Processor.class)
-@SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedAnnotationTypes("me.victor.ast.auto.log.annotation.AutoLog")
 public class AutoLogProcessor extends AbstractProcessor {
     private static final String CONSTRUCTOR = "<init>";
     private static final String RETURN_VAL = "$$ret$$";
@@ -59,6 +56,16 @@ public class AutoLogProcessor extends AbstractProcessor {
     private JavacTrees trees;
     private TreeMaker maker;
     private Names names;
+
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        return Collections.singleton(AutoLog.class.getCanonicalName());
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {

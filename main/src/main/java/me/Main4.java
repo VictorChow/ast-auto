@@ -20,12 +20,12 @@ public class Main4 {
 
     }
 
-    @AutoLog
+//    @AutoLog
     private static Main4 test() {
         return null;
     }
 
-    @AutoLog
+//    @AutoLog
     private <T> Map<String, T> test2(String name) {
         System.err.println(name);
         return Collections.singletonMap("name", null);

@@ -20,7 +20,6 @@ public class Main3 {
 
     }
 
-//    @AutoLog
     private static Main3 test() {
         return null;
     }

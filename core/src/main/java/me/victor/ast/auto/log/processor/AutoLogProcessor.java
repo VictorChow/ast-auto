@@ -2,6 +2,11 @@ package me.victor.ast.auto.log.processor;
 
 import com.google.auto.service.AutoService;
 import com.sun.source.tree.Tree;
+import com.sun.source.tree.VariableTree;
+import com.sun.source.util.JavacTask;
+import com.sun.source.util.TaskEvent;
+import com.sun.source.util.TaskListener;
+import com.sun.source.util.TreePathScanner;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
@@ -46,7 +51,7 @@ public class AutoLogProcessor extends AbstractProcessor {
     private static final String CONSTRUCTOR = "<init>";
     private static final String RETURN_VAL = "$$ret$$";
     private static final String INVOKE_TIME = "$$time$$";
-    private static final String LOGGER_PREFIX = "<%s.%s> ";
+    private static final String LOGGER_PREFIX = "<%s.%s>%s ";
 
     private final Set<JCTree.JCClassDecl> symbols = new HashSet<>();
     private final Map<String, Supplier<JCTree.JCExpression>> retInitVal = new HashMap<>();
@@ -103,35 +108,37 @@ public class AutoLogProcessor extends AbstractProcessor {
         Set<? extends Element> set = roundEnv.getElementsAnnotatedWith(AutoLog.class);
         for (Element element : set) {
             JCTree tree = trees.getTree(element);
+            AutoLog autoLog = element.getAnnotation(AutoLog.class);
             if (element.getKind() == ElementKind.CLASS) {
-                handleClass((JCTree.JCClassDecl) tree);
+                handleClass((JCTree.JCClassDecl) tree, autoLog);
                 symbols.add(((JCTree.JCClassDecl) tree));
             } else if (element.getKind() == ElementKind.METHOD) {
-                handleMethods((JCTree.JCMethodDecl) tree);
+                handleMethods((JCTree.JCMethodDecl) tree, autoLog);
             }
         }
         return false;
     }
 
-    private void handleClass(JCTree.JCClassDecl classDecl) {
+    private void handleClass(JCTree.JCClassDecl classDecl, AutoLog autoLog) {
         classDecl.defs.stream()
                 .filter(it -> it.getKind() == Tree.Kind.METHOD)
                 .map(it -> (JCTree.JCMethodDecl) it)
                 .filter(it -> !it.name.toString().contains(CONSTRUCTOR))
-                .forEach(it -> insertLogLogic(classDecl, it));
+                .forEach(it -> insertLogLogic(classDecl, it, autoLog));
     }
 
-    private void handleMethods(JCTree.JCMethodDecl methodDecl) {
+    private void handleMethods(JCTree.JCMethodDecl methodDecl, AutoLog autoLog) {
         JCTree.JCClassDecl classDecl = (JCTree.JCClassDecl) trees.getTree(methodDecl.sym.owner);
         if (symbols.contains(classDecl)) {
             //标记在类上的注解已经处理所有方法, 无需在标记方法上再次处理
             return;
         }
-        insertLogLogic(classDecl, methodDecl);
+        insertLogLogic(classDecl, methodDecl, autoLog);
     }
 
-    private void insertLogLogic(JCTree.JCClassDecl classDecl, JCTree.JCMethodDecl methodDecl) {
-        String logPrefix = String.format(LOGGER_PREFIX, classDecl.name, methodDecl.name);
+    private void insertLogLogic(JCTree.JCClassDecl classDecl, JCTree.JCMethodDecl methodDecl, AutoLog autoLog) {
+        String tag = autoLog.value().isEmpty() ? "" : "[" + autoLog.value() + "]";
+        String logPrefix = String.format(LOGGER_PREFIX, classDecl.name, methodDecl.name, tag);
         wrapSingleStatementToBlock(methodDecl);
         //先包装try...finally再定义time变量, 不然time变量被包在try中导致finally里获取不到time变量
         handleTimeLogic(methodDecl, logPrefix);

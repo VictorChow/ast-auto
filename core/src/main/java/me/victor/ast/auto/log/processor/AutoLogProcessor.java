@@ -2,11 +2,6 @@ package me.victor.ast.auto.log.processor;
 
 import com.google.auto.service.AutoService;
 import com.sun.source.tree.Tree;
-import com.sun.source.tree.VariableTree;
-import com.sun.source.util.JavacTask;
-import com.sun.source.util.TaskEvent;
-import com.sun.source.util.TaskListener;
-import com.sun.source.util.TreePathScanner;
 import com.sun.tools.javac.api.JavacTrees;
 import com.sun.tools.javac.code.Type;
 import com.sun.tools.javac.code.TypeTag;
@@ -24,6 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -48,6 +44,7 @@ import me.victor.ast.auto.log.logger.AutoLogAdapter;
  */
 @AutoService(Processor.class)
 public class AutoLogProcessor extends AbstractProcessor {
+    private static final String ENV_AUTO_LOG = "auto_log";
     private static final String CONSTRUCTOR = "<init>";
     private static final String RETURN_VAL = "$$ret$$";
     private static final String INVOKE_TIME = "$$time$$";
@@ -75,12 +72,20 @@ public class AutoLogProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
+        if (ignore()) {
+            return;
+        }
         messager = processingEnv.getMessager();
         trees = JavacTrees.instance(processingEnv);
         Context context = ((JavacProcessingEnvironment) processingEnv).getContext();
         maker = TreeMaker.instance(context);
         names = Names.instance(context);
         initPrimitiveDefValues();
+    }
+
+    private boolean ignore() {
+        return !Objects.equals(System.getenv(ENV_AUTO_LOG), Boolean.TRUE.toString()) &&
+                !Objects.equals(System.getProperty(ENV_AUTO_LOG), Boolean.TRUE.toString());
     }
 
     private void initPrimitiveDefValues() {
@@ -105,6 +110,9 @@ public class AutoLogProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        if (ignore()) {
+            return false;
+        }
         Set<? extends Element> set = roundEnv.getElementsAnnotatedWith(AutoLog.class);
         for (Element element : set) {
             JCTree tree = trees.getTree(element);

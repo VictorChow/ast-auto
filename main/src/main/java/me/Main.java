@@ -7,7 +7,7 @@ import me.victor.ast.auto.log.annotation.AutoLog;
 /**
  * Created by victor on 2022/3/15. (ง •̀_•́)ง
  */
-//@AutoLog
+@AutoLog
 public class Main {
     //    private static final CSPSLogger log = CSPSLogFactory.get(Main.class);
 
@@ -25,12 +25,13 @@ public class Main {
         //        System.err.println("结果:" + testReturn("12"));
         test("1", "2");
 
-        try {
-            throw new RuntimeException();
-        } finally {
-            System.err.println("finally 返回");
-            System.err.println("finally ~~~~~~~~");
-        }
+        System.out.println(System.getenv("AUTO_LOG"));
+        //        try {
+//            throw new RuntimeException();
+//        } finally {
+//            System.err.println("finally 返回");
+//            System.err.println("finally ~~~~~~~~");
+//        }
     }
 
     //    @AutoLog
